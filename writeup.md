@@ -155,7 +155,7 @@ The final drawing of the results is located on lines 203-223 of the same `projec
 
 After doing all above steps I came up with the following result:
 
-![][image6]
+![][image19]
 
 ---
 
