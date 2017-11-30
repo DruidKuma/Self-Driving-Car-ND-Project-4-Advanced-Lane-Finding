@@ -188,17 +188,27 @@ def detectLines(binary_warped):
 	# Measure Radius of Curvature for each lane line
 	ym_per_pix = 30./720 # meters per pixel in y dimension
 	xm_per_pix = 3.7/700 # meteres per pixel in x dimension
+
+	y_eval = np.max(ploty)
 	left_fit_cr = np.polyfit(lefty*ym_per_pix, leftx*xm_per_pix, 2)
 	right_fit_cr = np.polyfit(righty*ym_per_pix, rightx*xm_per_pix, 2)
-	left_curverad = ((1 + (2*left_fit_cr[0]*np.max(lefty) + left_fit_cr[1])**2)**1.5) \
-	                             /np.absolute(2*left_fit_cr[0])
-	right_curverad = ((1 + (2*right_fit_cr[0]*np.max(lefty) + right_fit_cr[1])**2)**1.5) \
-	                                /np.absolute(2*right_fit_cr[0])
+
+	left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+	right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
 	avg_curverad = int((left_curverad + right_curverad)/2)
 
-	return ploty, left_fitx, right_fitx, avg_curverad
+	#Calculate distance from center
+	image_center = binary_warped.shape[1]/2
+	image_height = binary_warped.shape[0]
+	car_position = image_center
+	#Find distance between car position and middle of left and right x_intercept
+	left_fit_x_intercept = left_fit[0]*image_height**2 + left_fit[1]*image_height + left_fit[2]
+	right_fit_x_intercept = right_fit[0]*image_height**2 + right_fit[1]*image_height + right_fit[2]
+	center_dist = xm_per_pix * (car_position - (left_fit_x_intercept + right_fit_x_intercept) / 2)
 
-def drawLane(img, warped, Minv, ploty, left_fitx, right_fitx, avg_curverad):
+	return ploty, left_fitx, right_fitx, avg_curverad, center_dist
+
+def drawLane(img, warped, Minv, ploty, left_fitx, right_fitx, avg_curverad, center_dist):
 	# Create an image to draw the lines on
 	warp_zero = np.zeros_like(warped).astype(np.uint8)
 	color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
@@ -216,9 +226,13 @@ def drawLane(img, warped, Minv, ploty, left_fitx, right_fitx, avg_curverad):
 	# Combine the result with the original image
 	result = cv2.addWeighted(img, 1, newwarp, 0.3, 0)
 
-	# Print radius of curvature on video
-	cv2.putText(result, 'Curve Radius {}(m)'.format(avg_curverad), (120,140),
-	         fontFace = 16, fontScale = 2, color=(255,255,255), thickness = 2)
+	# Print radius of curvature and distance from center on video
+	cv2.putText(result, 'Curve Radius {} m'.format(avg_curverad), (50,50),
+	         fontFace = 16, fontScale = 1.2, color=(255,255,255), thickness = 2)
+
+	direction = 'right' if center_dist > 0 else 'left'
+	cv2.putText(result, 'Distance from center {:04.3f} m to the {}'.format(abs(center_dist), direction), (50,100),
+	         fontFace = 16, fontScale = 1.2, color=(255,255,255), thickness = 2)
 
 	return result
 
@@ -304,22 +318,22 @@ def wholePipeline(img):
 	thresholded = thresholdPipeline(undistorted)
 	unwarped, Minv = unwarp(thresholded)
 
-	ploty, left_fitx, right_fitx, avg_curverad = detectLines(unwarped)
+	ploty, left_fitx, right_fitx, avg_curverad, center_dist = detectLines(unwarped)
 
-	result = drawLane(undistorted, unwarped, Minv, ploty, left_fitx, right_fitx, avg_curverad)
+	result = drawLane(undistorted, unwarped, Minv, ploty, left_fitx, right_fitx, avg_curverad, center_dist)
 	return result
 
 
 if __name__ == '__main__':
 	#generateCameraCalibrationMatrix()
 
-	image = cv2.imread('test_images/straight_lines1.jpg')
-	result = wholePipeline(image)
-	showImage(result)
+	# image = cv2.imread('test_images/straight_lines1.jpg')
+	# result = wholePipeline(image)
+	# showImage(result)
 
-	# clip1 = VideoFileClip("project_video.mp4")
-	# white_clip = clip1.fl_image(wholePipeline)
-	# white_clip.write_videofile('project_result_video.mp4', audio=False)
+	clip1 = VideoFileClip("project_video.mp4")
+	white_clip = clip1.fl_image(wholePipeline)
+	white_clip.write_videofile('project_result_video.mp4', audio=False)
 
 
 

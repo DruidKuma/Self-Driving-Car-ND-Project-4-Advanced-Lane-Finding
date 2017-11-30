@@ -93,7 +93,7 @@ After playing a bit with threshold boundaries, I obtained the following results 
 **Combined:**
 ![][image10]
 
-The code for color thresholding can be found in file `project_code.py` (lines 233-245)
+The code for color thresholding can be found in file `project_code.py` (lines 246-259)
 
 After this I also applied gradient thresholding
 I combined Sobel X with Sobel Y binary masks and gradient magnitude with gradient direction binary masks to obtain the following results:
@@ -113,15 +113,15 @@ I combined Sobel X with Sobel Y binary masks and gradient magnitude with gradien
 **Combined:**
 ![][image15]
 
-The code for gradient thresholding can be found in `project_code.py` file on lines 249-285.
+The code for gradient thresholding can be found in `project_code.py` file on lines 262-299.
 
-After these steps I combined color thresholding and gradient thresholding altogether and got the final result (lines 289-294):
+After these steps I combined color thresholding and gradient thresholding altogether and got the final result (lines 302-309):
 
 ![][image16]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `unwarp()`, which appears in lines 59 through 80 in the file `project_code.py`. I chose to hardcode the source and destination points so that they fit the following mapping:
+The code for my perspective transform includes a function called `unwarp()`, which appears in lines 58 through 74 in the file `project_code.py`. I chose to hardcode the source and destination points so that they fit the following mapping:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
@@ -147,11 +147,11 @@ I used global variables to apply sliding windows only once and slightly hurry up
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this on lines 188-197 on `project_code.py` file, measuring the average of the two curves to draw them on video.
+I did this on lines 188-197 on `project_code.py` file, measuring the average of the two curves to draw them on video, and on lines 200-207, calculating the position of car with respect to center.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-The final drawing of the results is located on lines 203-223 of the same `project_code.py` file.
+The final drawing of the results is located on lines 211-237 of the same `project_code.py` file.
 
 After doing all above steps I came up with the following result:
 
